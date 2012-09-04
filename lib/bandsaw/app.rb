@@ -47,12 +47,19 @@ module BandSaw
       end
 
       def self.start
+         @event_q = Queue.new
+
          start_workers
          start_server
       end
 
       def self.start_server
-         while true
+         begin
+            @log.debug("starting server thread")
+            server = BandSaw::Server.new
+            server.start(@event_q)
+         rescue Exception => e
+            @log.fetal(e)
          end
       end
 
@@ -65,9 +72,14 @@ module BandSaw
             end
 
             if workers
-               workers = workers.to_i
-               workers.times do |x|
-                  worker.start(x.to_s)
+               begin
+                  @log.debug("starting #{workers} worker thread(s)")
+                  workers = workers.to_i
+                  workers.times do |x|
+                     worker.start(x.to_s, @event_q)
+                  end
+               rescue Exception => e
+                  @log.error(e)
                end
             end
          end

@@ -27,7 +27,7 @@ module BandSaw
             cur_sub = String.new
 
             IO.foreach(file) do |line|
-               line.chop
+               line = line.chop
 
                next if line =~ /^$/
                next if line =~ /^#/

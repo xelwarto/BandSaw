@@ -9,4 +9,5 @@ module BandSaw
    autoload :Constants, "bandsaw/constants"
    autoload :Log, "bandsaw/log"
    autoload :Worker, "bandsaw/worker"
+   autoload :Server, "bandsaw/server"
 end
