@@ -70,11 +70,17 @@ module BandSaw
                   end
                end
             end
-            @configured = true
+
+            if @params[:general]
+               @configured = true
+            else
+               raise "unable to verify configuration file (#{file})"
+            end
          else
-            # ERROR MSG HERE
+            raise "unable to access configuration file (#{file})"
          end
       end
    end
 end
+
 # vi:tabstop=3:expandtab:ai

@@ -9,7 +9,7 @@ module BandSaw
             ARGV.each do |x|
                if x =~ /^-/
                   cur_argvs = x
-                  argvs[cur_argvs] = 1
+                  argvs[cur_argvs] = ""
                else
                   if cur_argvs != ""
                      argvs[cur_argvs] = x
@@ -21,7 +21,23 @@ module BandSaw
          argvs
       end
 
+      def self.show_use
+         usage = <<EOF
+#{$0} OPTIONS
+
+Options:
+	-c <file> Use alternate configuration file
+	-d        Run in background as a daemon process
+        -D        Turn on debug mode
+	-h        This help menu
+	-q        Run in quiet mode
+
+EOF
+         usage
+      end
+
       def self.show_banner
+         cons = BandSaw::Constants.instance
          banner = <<EOF
 ______                 _ _____                
 | ___ \\               | /  ___|               
@@ -29,10 +45,14 @@ ______                 _ _____
 | ___ \\/ _` | '_ \\ / _` |`--. \\/ _` \\ \\ /\\ / /
 | |_/ / (_| | | | | (_| /\\__/ / (_| |\\ V  V / 
 \\____/ \\__,_|_| |_|\\__,_\\____/ \\__,_| \\_/\\_/  
+Version: #{cons.version}
+Written by: #{cons.author}
 
 EOF
-         puts banner
+         banner
       end
 
    end
 end
+
+# vi:tabstop=3:expandtab:ai
