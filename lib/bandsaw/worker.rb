@@ -27,7 +27,7 @@ module BandSaw
                   end
                end
             else
-               # ERROR HERE
+               raise "event queue not available"
             end
          else
             raise "unable to start worker thread (#{id})"
@@ -35,7 +35,12 @@ module BandSaw
       end
 
       def do_work(event)
-         puts "Worker#{event.get_worker}: #{event.get_msg}"
+         if @config.params[:events] 
+            @config.params[:events].each do |e_id, e_data|
+            end
+         else
+            raise "unable to locate configured events"
+         end
       end
    end
 end

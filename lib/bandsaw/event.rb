@@ -4,6 +4,8 @@ module BandSaw
    def initialize
       @worker_id = ""
       @event_msg = ""
+      @event_id = ""
+      @event_match = false
    end
 
    def set_msg(msg)
@@ -24,6 +26,24 @@ module BandSaw
 
    def get_worker
       @worker_id
+   end
+
+   def set_event(id)
+      if id
+         @event_id = id
+      end
+   end
+
+   def get_event
+      @event_id
+   end
+
+   def matched?
+      @event_match
+   end
+
+   def set_match
+      @event_match = true
    end
 
    end

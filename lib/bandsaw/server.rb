@@ -28,7 +28,11 @@ module BandSaw
                      @log.debug("received client connection")
 
                      Thread.start(client) do |clnt|
-                        handle_client(clnt, event_q)
+                        begin
+                           handle_client(clnt, event_q)
+                        rescue Exception => e
+                           @log.fatal(e)
+                        end
                      end
                   end
                else
@@ -47,12 +51,16 @@ module BandSaw
          if clnt && !clnt.closed?
             if event_q
                while true
-                  input = clnt.gets.chop
+                  input = clnt.gets
                   break if !input
 
-                  event = BandSaw::Event.new
-                  event.set_msg(input.to_s)
-                  event_q.enq(event)
+                  if input
+                     input = input.chop
+
+                      event = BandSaw::Event.new
+                      event.set_msg(input.to_s)
+                      event_q.enq(event)
+                  end
                end
                clnt.close
             else

@@ -59,7 +59,7 @@ module BandSaw
             server = BandSaw::Server.new
             server.start(@event_q)
          rescue Exception => e
-            @log.fetal(e)
+            @log.fatal(e)
          end
       end
 
