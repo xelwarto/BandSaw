@@ -10,4 +10,5 @@ module BandSaw
    autoload :Log, "bandsaw/log"
    autoload :Worker, "bandsaw/worker"
    autoload :Server, "bandsaw/server"
+   autoload :Event, "bandsaw/event"
 end

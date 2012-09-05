@@ -35,7 +35,7 @@ module BandSaw
          end
       end
 
-      def fetal(msg)
+      def fatal(msg)
          if msg
             msg = "Error: #{msg}"
             puts msg

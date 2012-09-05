@@ -20,7 +20,7 @@ def handle_client(c)
 end
 
 def main
-   server = TCPServer.open("172.69.68.61", 8100)
+   server = TCPServer.open("127.0.0.1", 8100)
    @q = Queue.new
 
    Thread.new do
@@ -41,6 +41,7 @@ def main
 
    while true
       client = server.accept
+puts client.class
       puts "CLIENT CONNECTED"
       Thread.start(client) do |c|
          handle_client(c)

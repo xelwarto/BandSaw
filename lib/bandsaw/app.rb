@@ -30,7 +30,7 @@ module BandSaw
             @config.params[:debug] = true if @argvs["-D"]
             @config.params[:daemon] = true if @argvs["-d"]
          rescue Exception => e
-            @log.fetal(e)
+            @log.fatal(e)
             exit 1
          end
 

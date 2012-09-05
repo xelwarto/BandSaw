@@ -37,19 +37,30 @@ module BandSaw
             else
                raise "unable to set server port"
             end
+         else
+            raise "event queue not available"
          end
       end
 
       def handle_client(clnt, event_q)
          @log.debug("starting client handler thread")
+         if clnt && !clnt.closed?
+            if event_q
+               while true
+                  input = clnt.gets.chop
+                  break if !input
 
-         while true
-            input = clnt.gets.chop
-            break if !input
-            event_q.enq(input)
+                  event = BandSaw::Event.new
+                  event.set_msg(input.to_s)
+                  event_q.enq(event)
+               end
+               clnt.close
+            else
+               raise "event queue not available"
+            end
+         else
+            raise "client connection not available"
          end
-
-         clnt.close
 
          @log.debug("ending client handler thread")
       end
