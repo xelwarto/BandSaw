@@ -5,6 +5,9 @@ module BandSaw
          @cons = BandSaw::Constants.instance
          @config = BandSaw::Config.instance
          @log = BandSaw::Log.instance
+
+         @event_log = Hash.new
+         @lock = Mutex.new
       end
 
       def start(id, event_q)
@@ -37,6 +40,8 @@ module BandSaw
       def do_work(event)
          if @config.params[:events] 
             @config.params[:events].each do |e_id, e_data|
+               @lock.synchronize {
+               }
             end
          else
             raise "unable to locate configured events"
