@@ -1,6 +1,8 @@
 require 'singleton'
 require 'socket'
 require 'thread'
+require 'rubygems'
+require 'json'
 
 module BandSaw
    autoload :Config, "bandsaw/config"

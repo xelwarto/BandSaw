@@ -38,6 +38,23 @@ module BandSaw
       end
 
       def do_work(event)
+         if event && event.msg
+            event.set_data(parse_msg(event.msg))
+            if event.data
+               puts event.data
+               if event.data["type"]
+                  puts event.data["type"]
+                  eval_event(event) 
+               end
+            else
+               raise "event data not found"
+            end
+         else
+            raise "unable to do worker - event not found"
+         end         
+      end
+
+      def eval_event(event)
          if @config.params[:events] 
             @config.params[:events].each do |e_id, e_data|
                @lock.synchronize {
@@ -45,6 +62,18 @@ module BandSaw
             end
          else
             raise "unable to locate configured events"
+         end
+      end
+
+      def parse_msg(msg)
+         if msg && msg != ""
+            begin
+               JSON.parse(msg)
+            rescue Exception => e
+               @log.fatal(e)
+            end
+         else
+            raise "unable to parse event message"
          end
       end
    end
