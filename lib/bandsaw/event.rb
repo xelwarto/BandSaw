@@ -1,30 +1,17 @@
 module BandSaw
    class Event
 
-      attr_reader :worker, :msg, :type, :data
+      attr_reader :id, :msg, :data
 
       def initialize
-         @worker = String.new
+         @id = BandSaw::Util.get_rand_id
          @msg = String.new
-         @type = String.new
          @data = Hash.new
       end
 
       def set_msg(msg_in)
          if msg_in
             @msg = msg_in
-         end
-      end 
-
-      def set_worker(id_in)
-         if id_in
-            @worker = id_in
-         end
-      end 
-
-      def set_type(type_in)
-         if type_in
-            @type = type_in
          end
       end 
 

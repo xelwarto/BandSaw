@@ -56,10 +56,7 @@ module BandSaw
 
                   if input
                      input = input.chop
-
-                      event = BandSaw::Event.new
-                      event.set_msg(input.to_s)
-                      event_q.enq(event)
+                     event_q.enq(input.to_s)
                   end
                end
                clnt.close

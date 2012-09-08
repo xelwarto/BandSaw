@@ -1,5 +1,7 @@
 module BandSaw
    class Util
+      ID_CHARS = ('0'..'9').to_a
+      DEF_ID_LEN = 20
 
       def self.get_argvs
          argvs = Hash.new
@@ -52,6 +54,23 @@ EOF
          banner
       end
 
+      def self.get_rand_id(len=DEF_ID_LEN)
+         begin
+            len = DEF_ID_LEN if ! len.instance_of? Fixnum
+            self.gen_rand_id(Array.new(len, ''), ID_CHARS)
+         rescue => e
+            raise "#{e.message}"
+         end
+      end
+
+      private
+
+      def self.gen_rand_id(a, chars)
+         raise ArgumentError, "invalid argument (a)" if ! a.instance_of? Array
+         raise ArgumentError, "invalid argument (chars)" if ! chars.instance_of? Array
+         a.collect { chars[rand(chars.size)] }.join
+      end
+ 
    end
 end
 
