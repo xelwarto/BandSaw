@@ -5,7 +5,7 @@ module BandSaw
       attr_reader :version, :author, :cfg_file, :cfg_dir, :workers, :bind, :port
 
       def initialize
-         @version = "0.1"
+         @version = "0.2"
          @author = "Ted Elwartowski (09/2012)"
 
          @cfg_file = "bandsaw.cfg"
