@@ -1,5 +1,6 @@
 require 'singleton'
 require 'socket'
+require 'net/smtp'
 require 'thread'
 require 'rubygems'
 require 'json'
@@ -14,4 +15,5 @@ module BandSaw
    autoload :Server, "bandsaw/server"
    autoload :Event, "bandsaw/event"
    autoload :EventLog, "bandsaw/eventlog"
+   autoload :SendMsg, "bandsaw/sendmsg"
 end

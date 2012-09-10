@@ -73,6 +73,7 @@ module BandSaw
                               @log.debug("creating new event log for: #{e_id}")
                               e_log = BandSaw::EventLog.new
                               e_log.set_id(e_id)
+                              e_log.set_data(e_data)
                               @event_log[e_id] = e_log
                            }
                         end
@@ -103,12 +104,14 @@ module BandSaw
                                                 @event_log[e_id].clear_alert_hit
                                              else
                                                 @log.info("sending alert for event: #{event.id} (#{e_id})")
+                                                send_alert(event, @event_log[e_id])
                                                 @event_log[e_id].clear_alerts
                                                 @event_log[e_id].add_alert_hit
                                              end
                                           else
                                              if @event_log[e_id].alerts >= e_data[:retry].to_i
                                                 @log.info("sending alert for event: #{event.id} (#{e_id})")
+                                                send_alert(event, @event_log[e_id])
                                                 @event_log[e_id].clear_alerts
                                                 @event_log[e_id].add_alert_hit
                                              end
@@ -150,6 +153,23 @@ module BandSaw
             end
          else
             @log.error("worker unable to parse event data")
+         end
+      end
+
+      def send_alert(event, event_log)
+         if event
+            if event_log
+               notify = event_log.data[:notify]
+               if notify && notify != ""
+                  @log.debug("found event notify list: #{notfy}")
+               else
+                  @log.error("unable to locate event notify list")
+               end
+            else
+               @log.error("worker unable to send event alert")
+            end
+         else
+            @log.error("worker unable to send event alert")
          end
       end
    end

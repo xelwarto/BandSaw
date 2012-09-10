@@ -1,10 +1,11 @@
 module BandSaw
    class EventLog
 
-      attr_reader :id, :count, :alerts, :alert_hit
+      attr_reader :id, :data, :count, :alerts, :alert_hit
 
       def initialize
          @id = String.new
+         @data = Hash.new
          @count = 0
          @alerts = 0
          @alert_hit = false
@@ -13,6 +14,12 @@ module BandSaw
       def set_id(e_id)
          if e_id
             @id = e_id
+         end
+      end 
+
+      def set_data(e_data)
+         if e_data
+            @data = e_data
          end
       end 
 
