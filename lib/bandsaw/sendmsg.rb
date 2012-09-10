@@ -51,6 +51,12 @@ module BandSaw
          end
       end
 
+      def set_to(t)
+         if t && t.instance_of? Array
+            @tos = t
+         end
+      end
+
       def send
          raise "from email address not set" unless @from != ""
          raise "to email address not set" unless @tos.size > 0

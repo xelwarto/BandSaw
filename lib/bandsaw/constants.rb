@@ -2,7 +2,7 @@ module BandSaw
    class Constants
       include Singleton
 
-      attr_reader :version, :author, :cfg_file, :cfg_dir, :workers, :bind, :port, :smtp_server, :smtp_port
+      attr_reader :version, :author, :cfg_file, :cfg_dir, :workers, :bind, :port, :smtp_server, :smtp_port, :alert_sub
 
       def initialize
          @version = "0.2"
@@ -17,6 +17,7 @@ module BandSaw
 
          @smtp_server = "127.0.0.1"
          @smtp_port = "25"
+         @alert_sub = "BandSaw Alert:"
       end
    end
 end

@@ -161,7 +161,44 @@ module BandSaw
             if event_log
                notify = event_log.data[:notify]
                if notify && notify != ""
-                  @log.debug("found event notify list: #{notfy}")
+                  n_list = Array.new
+                  @log.debug("found event notify list: #{notify}")
+                  if notify =~ /\,/
+                     n_list = notify.split /\,/
+                  else
+                     n_list.push notify
+                  end
+
+                  to_list = Array.new
+                  n_list.each do |n|
+                     if @config.params[:emails][n.to_sym]
+                        if @config.params[:emails][n.to_sym][:email]
+                           @log.debug("found email list: #{@config.params[:emails][n.to_sym][:email]}")
+                           if @config.params[:emails][n.to_sym][:email] =~ /\,/
+                              to_list = @config.params[:emails][n.to_sym][:email].split /\,/
+                           else
+                              to_list.push @config.params[:emails][n.to_sym][:email]
+                           end
+                        end
+                     end
+                  end
+
+                  if to_list.size > 0
+                     sub = @cons.alert_sub
+                     data = ""
+                     begin
+                        send = BandSaw::SendMsg.new
+                        send.set_subject(sub)
+                        send.set_data(data)
+                        send.set_server(@config.params[:general][:smtp][:server]) if @config.params[:general][:smtp][:server]
+                        send.set_port(@config.params[:general][:smtp][:port]) if @config.params[:general][:smtp][:port]
+                        send.set_from(@config.params[:general][:smtp][:from]) if @config.params[:general][:smtp][:from]
+                        send.set_to(to_list)
+                        send.send
+                     rescue => e
+                        @log.error("unable to send alert: #{e.message}")
+                     end 
+                  end
                else
                   @log.error("unable to locate event notify list")
                end
