@@ -58,7 +58,7 @@ EOF
          begin
             len = DEF_ID_LEN if ! len.instance_of? Fixnum
             self.gen_rand_id(Array.new(len, ''), ID_CHARS)
-         rescue => e
+         rescue Exception => e
             raise "#{e.message}"
          end
       end

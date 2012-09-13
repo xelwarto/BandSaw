@@ -10,6 +10,27 @@ module BandSaw
          @lock = Mutex.new
       end
 
+      def init_event_log
+         @log.debug("initializing event log")
+         if @config.params[:events] 
+            @config.params[:events].each do |e_id, e_data|
+               if e_data && e_data[:match] && e_data[:type]
+                  if !@event_log[e_id]
+                     @log.debug("creating new event log for: #{e_id}")
+                     e_log = BandSaw::EventLog.new
+                     e_log.set_id(e_id)
+                     e_log.set_data(e_data)
+                     @event_log[e_id] = e_log
+                  end
+               end
+            end
+         else
+            @log.fatal("unable to locate events in configuration")
+            return false
+         end
+         return true
+      end
+
       def start(id, event_q)
          if id
             if event_q
@@ -32,7 +53,7 @@ module BandSaw
                            @log.error("worker #{i} unable to process message")
                         end
                      end
-                  rescue => e
+                  rescue Exception => e
                      @log.fatal("thread execution: #{e.message}")
                   end
                end
@@ -68,16 +89,6 @@ module BandSaw
                if @config.params[:events] 
                   @config.params[:events].each do |e_id, e_data|
                      if e_data && e_data[:match] && e_data[:type]
-                        if !@event_log[e_id]
-                           @lock.synchronize {
-                              @log.debug("creating new event log for: #{e_id}")
-                              e_log = BandSaw::EventLog.new
-                              e_log.set_id(e_id)
-                              e_log.set_data(e_data)
-                              @event_log[e_id] = e_log
-                           }
-                        end
-
                         if event.data["@type"] == e_data[:type]
                            regex_opt = false
                            if e_data[:ignoreCase] && e_data[:ignoreCase] =~ /true/i
@@ -91,38 +102,43 @@ module BandSaw
                               @log.info("event #{event.id} matched configured event: #{e_id}")
 
                               if @event_log[e_id]
-                                 @event_log[e_id].add_count
-                                 @event_log[e_id].add_alert
-                                 @log.debug("event log: #{e_id} ~ count = #{@event_log[e_id].count}")
-                                 @log.debug("event log: #{e_id} ~ alerts = #{@event_log[e_id].alerts}")
-
-                                 if e_data[:delay]
-                                    if @event_log[e_id].count >= e_data[:delay].to_i
-                                       if e_data[:retry]
-                                          if @event_log[e_id].count == @event_log[e_id].alerts
-                                             if @event_log[e_id].alert_hit
-                                                @event_log[e_id].clear_alert_hit
+                                 @lock.synchronize {
+                                    @event_log[e_id].add_count
+                                    @event_log[e_id].add_alert
+                                    @log.debug("event log: #{e_id} ~ count = #{@event_log[e_id].count}")
+                                    @log.debug("event log: #{e_id} ~ alerts = #{@event_log[e_id].alerts}")
+   
+                                    if e_data[:delay]
+                                       if @event_log[e_id].count >= e_data[:delay].to_i
+                                          if e_data[:retry]
+                                             if @event_log[e_id].count == @event_log[e_id].alerts
+                                                if @event_log[e_id].alert_hit
+                                                   @event_log[e_id].clear_alert_hit
+                                                else
+                                                   @log.info("sending alert for event: #{event.id} (#{e_id})")
+                                                   send_alert(event, @event_log[e_id])
+                                                   @event_log[e_id].clear_alerts
+                                                   @event_log[e_id].add_alert_hit
+                                                end
                                              else
-                                                @log.info("sending alert for event: #{event.id} (#{e_id})")
-                                                send_alert(event, @event_log[e_id])
-                                                @event_log[e_id].clear_alerts
-                                                @event_log[e_id].add_alert_hit
+                                                if @event_log[e_id].alerts >= e_data[:retry].to_i
+                                                   @log.info("sending alert for event: #{event.id} (#{e_id})")
+                                                   send_alert(event, @event_log[e_id])
+                                                   @event_log[e_id].clear_alerts
+                                                   @event_log[e_id].add_alert_hit
+                                                end
                                              end
                                           else
-                                             if @event_log[e_id].alerts >= e_data[:retry].to_i
-                                                @log.info("sending alert for event: #{event.id} (#{e_id})")
-                                                send_alert(event, @event_log[e_id])
-                                                @event_log[e_id].clear_alerts
-                                                @event_log[e_id].add_alert_hit
-                                             end
+                                             @log.info("sending alert for event: #{event.id} (#{e_id})")
+                                             send_alert(event, @event_log[e_id])
                                           end
-                                       else
-                                          @log.info("sending alert for event: #{event.id} (#{e_id})")
+   
+                                          @event_log[e_id].clear_count
                                        end
-
-                                       @event_log[e_id].clear_count
-                                    end
-                                 end 
+                                    else
+                                       send_alert(event, @event_log[e_id])
+                                    end 
+                                 }
                               end 
                            end
                         end
@@ -185,17 +201,23 @@ module BandSaw
 
                   if to_list.size > 0
                      sub = @cons.alert_sub
+                     if event_log.data[:subject]
+                        sub = "#{sub} #{event_log.data[:subject]} (#{event_log.id})"
+                     else
+                        sub = "#{sub} #{event_log.id}"
+                     end
+
                      data = ""
                      begin
                         send = BandSaw::SendMsg.new
                         send.set_subject(sub)
-                        send.set_data(data)
+                        send.set_body(data)
                         send.set_server(@config.params[:general][:smtp][:server]) if @config.params[:general][:smtp][:server]
                         send.set_port(@config.params[:general][:smtp][:port]) if @config.params[:general][:smtp][:port]
                         send.set_from(@config.params[:general][:smtp][:from]) if @config.params[:general][:smtp][:from]
                         send.set_to(to_list)
                         send.send
-                     rescue => e
+                     rescue Exception => e
                         @log.error("unable to send alert: #{e.message}")
                      end 
                   end

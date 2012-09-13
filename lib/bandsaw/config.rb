@@ -46,6 +46,12 @@ module BandSaw
                      cur_sec = $2
                      cur_sub = $1
 
+                     if !@params[cur_sec.to_sym]
+                        cur_sec = ""
+                        cur_sub = ""
+                        next
+                     end
+
                      if @params[cur_sec.to_sym]
                         if !@params[cur_sec.to_sym][cur_sub.to_sym]
                            @params[cur_sec.to_sym][cur_sub.to_sym] = Hash.new

@@ -65,7 +65,7 @@ module BandSaw
 
       def self.start_workers
          worker = BandSaw::Worker.new
-         if worker
+         if worker && worker.init_event_log
             workers = @cons.workers
             if @config.params[:general][:workers]
                workers = @config.params[:general][:workers]
@@ -82,6 +82,8 @@ module BandSaw
                   @log.error(e)
                end
             end
+         else
+            exit
          end
       end
 
