@@ -9,11 +9,9 @@ module BandSaw
          @server = @cons.smtp_server
          @port = @cons.smtp_port
          @from = @cons.smtp_from
-         @subject = @cons.smtp_subject
 
          @tos = Array.new
-         @to = String.new
-         @body = String.new
+         @data = String.new
       end
 
       def set_server(s)
@@ -34,15 +32,9 @@ module BandSaw
          end
       end
 
-      def set_subject(s)
-         if s
-            @subject = s
-         end
-      end
-
-      def set_body(b)
-         if b
-            @body = b
+      def set_data(d)
+         if d
+            @data = d
          end
       end
 
@@ -62,29 +54,11 @@ module BandSaw
 
       def send
          raise "from email address not set" unless @from != ""
-         raise "to email address not set" unless @tos.size > 0
-         raise "subject not set" unless @subject != ""
-
-         c = 0
-         @tos.each do |t|
-            if c == 0
-               @to = "#{t}"
-            else
-               @to = "#{@to}, #{t}"
-            end
-         end
-
-         data = <<EOF
-From: #{@from}
-To: #{@to}
-Subject: #{@subject}
-
-#{@body}
-EOF
+         raise "to email address(es) not set" unless @tos.size > 0
 
          smtp = Net::SMTP.new(@server, @port) 
          smtp = Net::SMTP.start("localhost")
-         smtp.send_message(data, @from, @tos)
+         smtp.send_message(@data, @from, @tos)
          smtp.finish
       end
    end

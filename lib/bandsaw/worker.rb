@@ -200,64 +200,19 @@ module BandSaw
       def send_alert(event, event_log)
          if event
             if event_log
-               notify = event_log.data[:notify]
-               if notify && notify != ""
-                  n_list = Array.new
-                  @log.debug("found event notify list: #{notify}")
-                  if notify =~ /\,/
-                     n_list = notify.split /\,/
-                  else
-                     n_list.push notify
-                  end
-
-                  to_list = Array.new
-                  n_list.each do |n|
-                     if @config.params[:emails][n.to_sym]
-                        if @config.params[:emails][n.to_sym][:email]
-                           @log.debug("found email list: #{@config.params[:emails][n.to_sym][:email]}")
-                           if @config.params[:emails][n.to_sym][:email] =~ /\,/
-                              to_list = @config.params[:emails][n.to_sym][:email].split /\,/
-                           else
-                              to_list.push @config.params[:emails][n.to_sym][:email]
-                           end
-                        end
-                     end
-                  end
-
-                  if to_list.size > 0
-                     sub = @cons.smtp_subject
-                     if @config.params[:general][:smtp]
-                        if @config.params[:general][:smtp][:subject]
-                           sub = @config.params[:general][:smtp][:subject]
-                        end
-                     end
-
-                     if event_log.data[:subject]
-                        sub = "#{sub} #{event_log.data[:subject]} (#{event_log.id})"
-                     else
-                        sub = "#{sub} #{event_log.id}"
-                     end
-
-                     data = ""
-                     begin
-                        send = BandSaw::SendMsg.new
-                        send.set_subject(sub)
-                        send.set_body(data)
-                        send.set_to(to_list)
-
-                        if @config.params[:general][:smtp]
-                           send.set_server(@config.params[:general][:smtp][:server]) if @config.params[:general][:smtp][:server]
-                           send.set_port(@config.params[:general][:smtp][:port]) if @config.params[:general][:smtp][:port]
-                           send.set_from(@config.params[:general][:smtp][:from]) if @config.params[:general][:smtp][:from]
-                        end
-
-                        send.send
-                     rescue Exception => e
-                        @log.error("unable to send alert: #{e.message}")
-                     end 
-                  end
-               else
-                  @log.error("unable to locate event notify list")
+               msgBldr = BandSaw::MsgBuilder.new(event, event_log)
+               if msgBldr.msg_to.size > 0
+                  begin
+                     send = BandSaw::SendMsg.new
+                     send.set_data(msgBldr.msg_data)
+                     send.set_to(msgBldr.msg_to)
+                     send.set_server(msgBldr.smtp_server)
+                     send.set_port(msgBldr.smtp_port)
+                     send.set_from(msgBldr.msg_from)
+                     send.send
+                  rescue Exception => e
+                     @log.error("unable to send alert: #{e.message}")
+                  end 
                end
             else
                @log.error("worker unable to send event alert")
