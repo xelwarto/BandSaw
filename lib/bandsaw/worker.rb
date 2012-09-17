@@ -8,9 +8,21 @@ module BandSaw
 
          @event_log = Hash.new
          @lock = Mutex.new
+         @alert_timeout = 0
       end
 
       def init_event_log
+         @log.debug("initializing alert timeout")
+         @alert_timeout = @cons.alert_timeout
+
+         if @config.params[:general][:alerts]
+            if @config.params[:general][:alerts][:timeout]
+               @alert_timeout = @config.params[:general][:alerts][:timeout]
+            end
+         end
+
+         @log.debug("alert timeout set to: #{@alert_timeout.to_s}")
+
          @log.debug("initializing event log")
          if @config.params[:events] 
             @config.params[:events].each do |e_id, e_data|
@@ -103,6 +115,19 @@ module BandSaw
 
                               if @event_log[e_id]
                                  @lock.synchronize {
+                                    if @event_log[e_id].last_alert.to_i != 0
+                                      @log.debug("last alert found for event: #{e_id} (#{@event_log[e_id].last_alert.to_s})")
+
+                                      event_timeout = @event_log[e_id].last_alert.to_i + @alert_timeout.to_i
+                                      @log.debug("timeout for event: #{e_id} (#{event_timeout.to_s})")
+
+                                      time_now = Time.now
+                                      if time_now.to_i >= event_timeout.to_i
+                                         @log.debug("event log timeout ~ clearing alerts for event: #{e_id}")
+                                         @event_log[e_id].clear_all
+                                      end
+                                    end 
+
                                     @event_log[e_id].add_count
                                     @event_log[e_id].add_alert
                                     @log.debug("event log: #{e_id} ~ count = #{@event_log[e_id].count}")
@@ -200,7 +225,13 @@ module BandSaw
                   end
 
                   if to_list.size > 0
-                     sub = @cons.alert_sub
+                     sub = @cons.smtp_subject
+                     if @config.params[:general][:smtp]
+                        if @config.params[:general][:smtp][:subject]
+                           sub = @config.params[:general][:smtp][:subject]
+                        end
+                     end
+
                      if event_log.data[:subject]
                         sub = "#{sub} #{event_log.data[:subject]} (#{event_log.id})"
                      else
@@ -212,10 +243,14 @@ module BandSaw
                         send = BandSaw::SendMsg.new
                         send.set_subject(sub)
                         send.set_body(data)
-                        send.set_server(@config.params[:general][:smtp][:server]) if @config.params[:general][:smtp][:server]
-                        send.set_port(@config.params[:general][:smtp][:port]) if @config.params[:general][:smtp][:port]
-                        send.set_from(@config.params[:general][:smtp][:from]) if @config.params[:general][:smtp][:from]
                         send.set_to(to_list)
+
+                        if @config.params[:general][:smtp]
+                           send.set_server(@config.params[:general][:smtp][:server]) if @config.params[:general][:smtp][:server]
+                           send.set_port(@config.params[:general][:smtp][:port]) if @config.params[:general][:smtp][:port]
+                           send.set_from(@config.params[:general][:smtp][:from]) if @config.params[:general][:smtp][:from]
+                        end
+
                         send.send
                      rescue Exception => e
                         @log.error("unable to send alert: #{e.message}")

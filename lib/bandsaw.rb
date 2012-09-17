@@ -16,4 +16,5 @@ module BandSaw
    autoload :Event, "bandsaw/event"
    autoload :EventLog, "bandsaw/eventlog"
    autoload :SendMsg, "bandsaw/sendmsg"
+   autoload :MsgBuilder, "bandsaw/msgbuilder"
 end

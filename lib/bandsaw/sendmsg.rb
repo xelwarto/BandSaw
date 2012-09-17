@@ -8,10 +8,11 @@ module BandSaw
 
          @server = @cons.smtp_server
          @port = @cons.smtp_port
+         @from = @cons.smtp_from
+         @subject = @cons.smtp_subject
+
          @tos = Array.new
          @to = String.new
-         @from = String.new
-         @subject = String.new
          @body = String.new
       end
 
