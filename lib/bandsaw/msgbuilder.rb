@@ -40,14 +40,14 @@ module BandSaw
             end
          end
 
-         if event_log.data[:subject]
-            @msg_subject = "#{@msg_subject} #{event_log.data[:subject]} (#{event_log.id})"
+         if @event_log.data[:subject]
+            @msg_subject = "#{@msg_subject} #{@event_log.data[:subject]} (#{@event_log.id})"
          else
-            @msg_subject = "#{@msg_subject} #{event_log.id}"
+            @msg_subject = "#{@msg_subject} #{@event_log.id}"
          end
 
          notify = String.new
-         notify = event_log.data[:notify] if event_log.data[:notify]
+         notify = @event_log.data[:notify] if @event_log.data[:notify]
          if notify && notify != ""
             n_list = Array.new
             @log.debug("found event notify list: #{notify}")
