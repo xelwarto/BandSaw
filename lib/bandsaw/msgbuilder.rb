@@ -1,7 +1,7 @@
 module BandSaw
    class MsgBuilder
 
-      attr_reader :msg_subject, :msg_to, :msg_from, :smtp_server, :smtp_port
+      attr_reader :msg_subject, :msg_to, :msg_from, :smtp_server, :smtp_port, :msg_data
 
       def initialize(event, event_log)
          @event = event
