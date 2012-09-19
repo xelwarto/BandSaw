@@ -5,7 +5,7 @@ module BandSaw
       attr_reader :version, :author, :cfg_file, :cfg_dir, :workers, :bind, :port, :smtp_server, :smtp_port, :smtp_subject, :smtp_from, :alert_timeout
 
       def initialize
-         @version = "0.3"
+         @version = "0.5"
          @author = "Ted Elwartowski (09/2012)"
 
          @cfg_file = "bandsaw.cfg"
