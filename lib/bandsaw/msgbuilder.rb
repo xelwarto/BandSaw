@@ -19,6 +19,33 @@ module BandSaw
          @msg_data = String.new
 
          find_msg_info
+         build_msg
+      end
+
+      def build_msg
+         to = @msg_to.join ","
+         @msg_data = <<EOF
+To: #{to}
+From: #{@msg_from}
+Subject: #{@msg_subject}
+
+An event has ocurred with the following information:
+
+Event id:    #{@event.id}
+Event name:  #{@event_log.id}
+
+Event Data:
+   Type:     #{@event.data["@type"]}
+   Host:     #{@event.data["@source_host"]}
+   Path:     #{@event.data["@source_path"]}
+   Message:  #{@event.data["@message"]}
+   Time:     #{@event.data["@timestamp"]}
+Alert Count: #{@event_log.full_count}
+
+Original Message:
+#{@event.msg}
+
+EOF
       end
 
       def find_msg_info

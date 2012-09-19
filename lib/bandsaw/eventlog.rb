@@ -1,13 +1,14 @@
 module BandSaw
    class EventLog
 
-      attr_reader :id, :data, :count, :alerts, :alert_hit, :last_alert
+      attr_reader :id, :data, :count, :alerts, :alert_hit, :last_alert, :full_count
 
       def initialize
          @id = String.new
          @data = Hash.new
          @count = 0
          @alerts = 0
+         @full_count = 0
          @alert_hit = false
          @last_alert = 0
       end
@@ -26,6 +27,7 @@ module BandSaw
 
       def add_count
          @count = @count + 1
+         @full_count = @full_count + 1
          update_time
       end
 
@@ -57,6 +59,7 @@ module BandSaw
 
       def clear_all
          @count = 0
+         @full_count = 0
          @alerts = 0
          @last_alert = 0
       end

@@ -21,13 +21,6 @@ module BandSaw
          @smtp_subject = "BandSaw Alert:"
 
          @alert_timeout = 1800
-
-         @alert_msg = <<EOF
-To: [TO]
-From: [FROM]
-Subject: [SUBJECT]
-
-EOF
       end
    end
 end

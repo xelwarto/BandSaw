@@ -201,6 +201,7 @@ module BandSaw
          if event
             if event_log
                msgBldr = BandSaw::MsgBuilder.new(event, event_log)
+puts msgBldr.msg_data
                if msgBldr.msg_to.size > 0
                   begin
                      send = BandSaw::SendMsg.new
